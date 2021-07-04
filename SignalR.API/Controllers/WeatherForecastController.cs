@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,20 +17,17 @@ namespace SignalR.API.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
         private readonly IHubContext<WeatherForecastHub> _hub;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IHubContext<WeatherForecastHub> hub)
+        public WeatherForecastController(IHubContext<WeatherForecastHub> hub)
         {
-            _logger = logger;
             _hub = hub;
         }
 
         [HttpGet]
         public async Task<IEnumerable<WeatherForecast>> Get()
         {
-            await _hub.Clients.All.SendAsync("ReceiveMessage", "get", "weather");
+            await _hub.Clients.All.SendAsync("ReceiveMessage", "Get Forecast", "successful");
 
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
