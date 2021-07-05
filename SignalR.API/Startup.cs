@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SignalR.Data;
 using SignalR.Hubs;
+using Microsoft.EntityFrameworkCore;
 
 namespace SignalR.API
 {
@@ -37,6 +39,9 @@ namespace SignalR.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SignalR.API", Version = "v1" });
             });
+
+            services.AddDbContext<DatabaseContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,17 +55,14 @@ namespace SignalR.API
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseCors("CorsPolicy");
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<WeatherForecastHub>("/weatherforecasthub");
+                endpoints.MapHub<UserHub>("/userhub");
             });
         }
     }

@@ -8,6 +8,7 @@ using SignalR.Hubs;
 
 namespace SignalR.API.Controllers
 {
+    [Produces("application/json")]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
