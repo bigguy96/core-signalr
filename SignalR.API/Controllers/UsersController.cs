@@ -11,7 +11,7 @@ namespace SignalR.API.Controllers
 {
     [Produces("application/json")]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/")]
     public class UsersController : ControllerBase
     {
         private readonly DatabaseContext _context;
@@ -23,24 +23,24 @@ namespace SignalR.API.Controllers
             _hub = hub;
         }
 
-        //[HttpGet]
-        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<User>))]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //public async Task<ActionResult<User>> GetOne(int id)
-        //{
-        //    var user = await _context.Users.FindAsync(id);
+        [HttpGet("/users/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<User>> GetOne(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
 
-        //    if (user == null)
-        //    {
-        //        await _hub.Clients.All.SendAsync("ReceiveMessage", $"User: {id}", "not found");
-        //        return NotFound();
-        //    }
+            if (user == null)
+            {
+                await _hub.Clients.All.SendAsync("ReceiveMessage", $"User: {id}", "not found");
+                return NotFound();
+            }
 
-        //    await _hub.Clients.All.SendAsync("ReceiveMessage", $"User: {id}", "found");
-        //    return user;
-        //}
+            await _hub.Clients.All.SendAsync("ReceiveMessage", $"User: {id}", "found");
+            return user;
+        }
 
-        [HttpGet]
+        [HttpGet("/users")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<User>))]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
@@ -51,16 +51,16 @@ namespace SignalR.API.Controllers
             return Ok(users);
         }
 
-        //[ProducesResponseType(StatusCodes.Status201Created)]
-        //[HttpPost]
-        //public async Task<ActionResult> Add(User user)
-        //{
-        //    _context.Users.Add(user);
-        //    await _context.SaveChangesAsync();
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
+        [HttpPost("/users")]
+        public async Task<ActionResult<User>> Add(User user)
+        {
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-        //    await _hub.Clients.All.SendAsync("ReceiveMessage", $"User: {user.Id}", "was created");
+            await _hub.Clients.All.SendAsync("ReceiveMessage", $"User: {user.Id}", "was created");
 
-        //    return CreatedAtAction("GetOne", new { id = user.Id }, user);
-        //}
+            return Ok(user);
+        }
     }
 }
