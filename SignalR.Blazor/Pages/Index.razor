@@ -23,7 +23,7 @@ Welcome to your new app.
 {
     private IAsyncEnumerable<string> _stream;
     private CancellationTokenSource _cancellationTokenSource;
-    private readonly List<string> _numbers = new List<string>();
+    private readonly List<string> _numbers = new();
     private HubConnection _connection;
 
     protected override async Task OnInitializedAsync()
