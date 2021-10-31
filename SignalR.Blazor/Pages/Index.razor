@@ -10,20 +10,19 @@
 Welcome to your new app.
 
 <ul>
-    @foreach (var count in _numbers)
+    @foreach (var image in _images)
     {
-        <li>@count</li>
+        <li><img src="@image" alt=""/></li>
     }
-
 </ul>
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 
 @code
 {
-    private IAsyncEnumerable<string> _stream;
+    private IAsyncEnumerable<byte[]> _stream;
     private CancellationTokenSource _cancellationTokenSource;
-    private readonly List<string> _numbers = new();
+    private readonly List<string> _images = new();
     private HubConnection _connection;
 
     protected override async Task OnInitializedAsync()
@@ -47,11 +46,14 @@ Welcome to your new app.
 
         _cancellationTokenSource = new CancellationTokenSource();
 
-        _stream = _connection.StreamAsync<string>("SendDataRow", _cancellationTokenSource.Token);
+        _stream = _connection.StreamAsync<byte[]>("SendDataRow", _cancellationTokenSource.Token);
 
         await foreach (var count in _stream.WithCancellation(_cancellationTokenSource.Token))
         {
-            _numbers.Add(count);
+            var src = Convert.ToBase64String(count);
+            var image = $"data:image/jpeg;base64,{src}";
+
+            _images.Add(image);
         }
     }
 

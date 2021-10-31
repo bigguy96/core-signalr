@@ -1,17 +1,24 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.AspNetCore.SignalR;
 
 namespace SignalR.Hubs
 {
     public class StreamHub : Hub
     {
-        public async IAsyncEnumerable<string> SendDataRow()
+        public async IAsyncEnumerable<byte[]> SendDataRow()
         {
-            for (var i = 0; i < 100; i++)
+            var myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            var files = System.IO.Directory.GetFiles( myDocuments,"*.jpg");
+
+            foreach (var file in files)
             {
-                await Task.Delay(100);
-                yield return i.ToString();
+                var bytes = await File.ReadAllBytesAsync(file);
+                
+                await using var ms = new MemoryStream(bytes);
+                
+                yield return ms.ToArray();
             }
         }
     }
