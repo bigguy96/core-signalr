@@ -3,18 +3,16 @@
 @using Microsoft.Extensions.Logging
 @using System.Threading
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 @implements IAsyncDisposable
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
 
-<ul>
-    @foreach (var image in _images)
-    {
-        <li><img src="@image" alt=""/></li>
-    }
-</ul>
+<p>Images will load as they become available...</p>
+<div id="images">
+</div>
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 
@@ -22,7 +20,6 @@ Welcome to your new app.
 {
     private IAsyncEnumerable<byte[]> _stream;
     private CancellationTokenSource _cancellationTokenSource;
-    private readonly List<string> _images = new();
     private HubConnection _connection;
 
     protected override async Task OnInitializedAsync()
@@ -45,15 +42,14 @@ Welcome to your new app.
         await _connection.StartAsync();
 
         _cancellationTokenSource = new CancellationTokenSource();
-
         _stream = _connection.StreamAsync<byte[]>("SendDataRow", _cancellationTokenSource.Token);
 
-        await foreach (var count in _stream.WithCancellation(_cancellationTokenSource.Token))
+        await foreach (var bytes in _stream.WithCancellation(_cancellationTokenSource.Token))
         {
-            var src = Convert.ToBase64String(count);
+            var src = Convert.ToBase64String(bytes);
             var image = $"data:image/jpeg;base64,{src}";
 
-            _images.Add(image);
+            await JS.InvokeVoidAsync("loadImage", image);
         }
     }
 

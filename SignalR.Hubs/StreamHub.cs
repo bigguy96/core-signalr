@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
 namespace SignalR.Hubs
@@ -17,7 +18,8 @@ namespace SignalR.Hubs
                 var bytes = await File.ReadAllBytesAsync(file);
                 
                 await using var ms = new MemoryStream(bytes);
-                
+
+                await Task.Delay(1000);
                 yield return ms.ToArray();
             }
         }

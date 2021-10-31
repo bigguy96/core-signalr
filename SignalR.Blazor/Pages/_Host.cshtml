@@ -30,6 +30,20 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <script src="_framework/blazor.server.js"></script>
+<script src="_framework/blazor.server.js"></script>
+<script>
+    function loadImage(src) {
+        const div = document.getElementById("images");
+        const img = document.createElement("img");
+
+        img.setAttribute("src", src);
+        img.setAttribute("height", "200");
+        img.setAttribute("width", "200");
+        img.setAttribute("alt", "");
+        div.appendChild(img);
+
+        console.log('image loaded');
+    }
+</script>
 </body>
 </html>
