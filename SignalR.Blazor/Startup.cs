@@ -55,7 +55,7 @@ namespace SignalR.Blazor
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
-                endpoints.MapHub<UserHub>("/userhub");
+                endpoints.MapHub<StreamHub>("/streamhub");
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

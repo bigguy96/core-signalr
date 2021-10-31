@@ -1,7 +1,65 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
+@using System.Threading
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
 
+<ul>
+    @foreach (var count in _numbers)
+    {
+        <li>@count</li>
+    }
+
+</ul>
+
 <SurveyPrompt Title="How is Blazor working for you?" />
+
+@code
+{
+    private IAsyncEnumerable<string> _stream;
+    private CancellationTokenSource _cancellationTokenSource;
+    private readonly List<string> _numbers = new List<string>();
+    private HubConnection _connection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _connection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/streamhub"))
+            .ConfigureLogging(logging =>
+            {
+                logging.AddDebug();
+                logging.SetMinimumLevel(LogLevel.Debug);
+            })
+            .Build();
+
+        _connection.Closed += async (error) =>
+        {
+            await Task.Delay(1000);
+            await _connection.StartAsync();
+        };
+
+        await _connection.StartAsync();
+
+        _cancellationTokenSource = new CancellationTokenSource();
+
+        _stream = _connection.StreamAsync<string>("SendDataRow", _cancellationTokenSource.Token);
+
+        await foreach (var count in _stream.WithCancellation(_cancellationTokenSource.Token))
+        {
+            _numbers.Add(count);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_connection is not null)
+        {
+            await _connection.DisposeAsync();
+        }
+    }
+}
