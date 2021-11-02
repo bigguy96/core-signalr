@@ -31,6 +31,8 @@
             })
             .Build();
 
+        _connection.ServerTimeout = TimeSpan.FromMinutes(3);
+
         _connection.Closed += async (error) =>
         {
             await Task.Delay(1000);
