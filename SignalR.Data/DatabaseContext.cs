@@ -7,5 +7,7 @@ namespace SignalR.Data
         public DatabaseContext(DbContextOptions options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+
+        public DbSet<Stream> Streams { get; set; }
     }
 }
