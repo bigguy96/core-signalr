@@ -1,0 +1,81 @@
+﻿@page "/upload"
+@using System.IO
+
+<h3>Upload Files</h3>
+
+<p>
+    <label>
+        Max file size:
+        <input type="number" @bind="_maxFileSize" />
+    </label>
+</p>
+
+<p>
+    <label>
+        Max allowed files:
+        <input type="number" @bind="_maxAllowedFiles" />
+    </label>
+</p>
+
+<p>
+    <label>
+        Upload up to @_maxAllowedFiles of up to @_maxFileSize bytes:
+        <InputFile OnChange="@LoadFiles" multiple />
+    </label>
+</p>
+
+@if (_isLoading)
+{
+    <p>Uploading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var file in _loadedFiles)
+        {
+            <li>
+                <ul>
+                    <li>Name: @file.Name</li>
+                    <li>Last modified: @file.LastModified.ToString()</li>
+                    <li>Size (bytes): @file.Size</li>
+                    <li>Content type: @file.ContentType</li>
+                </ul>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private readonly List<IBrowserFile> _loadedFiles = new();
+    private long _maxFileSize = 1024 * 10000;
+    private int _maxAllowedFiles = 3;
+    private bool _isLoading;
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _isLoading = true;
+        _loadedFiles.Clear();
+
+        foreach (var file in e.GetMultipleFiles(_maxAllowedFiles))
+        {
+            try
+            {
+                _loadedFiles.Add(file);
+
+                //var trustedFileNameForFileStorage = Path.GetRandomFileName();
+                var myPictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+                var path = Path.Combine(myPictures, "unsafe_uploads", file.Name);
+
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.OpenReadStream(_maxFileSize).CopyToAsync(fs);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        _isLoading = false;
+    }
+}
